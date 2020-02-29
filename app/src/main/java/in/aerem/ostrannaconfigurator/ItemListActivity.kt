@@ -1,6 +1,5 @@
 package `in`.aerem.ostrannaconfigurator
 
-import `in`.aerem.ostrannaconfigurator.dummy.DummyContent
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -10,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
-import com.polidea.rxandroidble2.RxBleClient
 import com.polidea.rxandroidble2.scan.ScanFilter
 import com.polidea.rxandroidble2.scan.ScanResult
 import com.polidea.rxandroidble2.scan.ScanSettings
@@ -37,7 +35,6 @@ class ItemListActivity : AppCompatActivity() {
      */
     private var twoPane: Boolean = false
 
-    private val rxBleClient by lazy { RxBleClient.create(this) }
     private lateinit var scanSubscription: Disposable
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,14 +59,15 @@ class ItemListActivity : AppCompatActivity() {
             .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
             .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
             .build()
+
         var scanFilter = ScanFilter.Builder()
             .build()
-        scanSubscription = rxBleClient.scanBleDevices(scanSettings, scanFilter).subscribe(
+        scanSubscription = (application as OstrannaConfiguratorApplication).rxBleClient
+            .scanBleDevices(scanSettings, scanFilter).subscribe(
             {
-                Log.i(TAG, "Seeing " + it.bleDevice.macAddress)
                 if (it.bleDevice.name != null) adapter.addResult(it)
             },
-            { Log.e(TAG, it.message) }
+            { Log.e(TAG, "Error: ${it.message}") }
         )
     }
 
@@ -87,11 +85,11 @@ class ItemListActivity : AppCompatActivity() {
 
         init {
             onClickListener = View.OnClickListener { v ->
-                val item = v.tag as DummyContent.DummyItem
+                val item = v.tag as ScanResult
                 if (twoPane) {
                     val fragment = ItemDetailFragment().apply {
                         arguments = Bundle().apply {
-                            putString(ItemDetailFragment.ARG_ITEM_ID, item.id)
+                            putString(ItemDetailFragment.ARG_ITEM_ID, item.bleDevice.macAddress)
                         }
                     }
                     parentActivity.supportFragmentManager
@@ -100,7 +98,7 @@ class ItemListActivity : AppCompatActivity() {
                             .commit()
                 } else {
                     val intent = Intent(v.context, ItemDetailActivity::class.java).apply {
-                        putExtra(ItemDetailFragment.ARG_ITEM_ID, item.id)
+                        putExtra(ItemDetailFragment.ARG_ITEM_ID, item.bleDevice.macAddress)
                     }
                     v.context.startActivity(intent)
                 }
@@ -111,11 +109,12 @@ class ItemListActivity : AppCompatActivity() {
             val existing = this.items.indexOfFirst { it.bleDevice.macAddress == r.bleDevice.macAddress }
             if (existing < 0) {
                 this.items.add(r)
+                notifyItemInserted(this.items.size - 1)
             } else {
                 this.items[existing] = r
+                notifyItemChanged(existing)
             }
-            this.items.sortByDescending { it.bleDevice.name }
-            notifyDataSetChanged()
+            // this.items.sortByDescending { it.bleDevice.name }
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
