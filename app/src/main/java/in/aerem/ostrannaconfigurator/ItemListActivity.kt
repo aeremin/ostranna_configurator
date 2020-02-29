@@ -3,15 +3,23 @@ package `in`.aerem.ostrannaconfigurator
 import `in`.aerem.ostrannaconfigurator.dummy.DummyContent
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.polidea.rxandroidble2.RxBleClient
+import com.polidea.rxandroidble2.scan.ScanFilter
+import com.polidea.rxandroidble2.scan.ScanResult
+import com.polidea.rxandroidble2.scan.ScanSettings
+import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_item_list.*
 import kotlinx.android.synthetic.main.item_list.*
 import kotlinx.android.synthetic.main.item_list_content.view.*
+import java.util.*
+
 
 /**
  * An activity representing a list of Pings. This activity
@@ -22,12 +30,15 @@ import kotlinx.android.synthetic.main.item_list_content.view.*
  * item details side-by-side using two vertical panes.
  */
 class ItemListActivity : AppCompatActivity() {
-
+    private val TAG = "ItemListActivity"
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
      */
     private var twoPane: Boolean = false
+
+    private val rxBleClient by lazy { RxBleClient.create(this) }
+    private lateinit var scanSubscription: Disposable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,19 +55,35 @@ class ItemListActivity : AppCompatActivity() {
             twoPane = true
         }
 
-        setupRecyclerView(item_list)
+        val adapter = SimpleItemRecyclerViewAdapter(this, twoPane)
+        item_list.adapter = adapter
+
+        var scanSettings = ScanSettings.Builder()
+            .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
+            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+            .build()
+        var scanFilter = ScanFilter.Builder()
+            .build()
+        scanSubscription = rxBleClient.scanBleDevices(scanSettings, scanFilter).subscribe(
+            {
+                Log.i(TAG, "Seeing " + it.bleDevice.macAddress)
+                if (it.bleDevice.name != null) adapter.addResult(it)
+            },
+            { Log.e(TAG, it.message) }
+        )
     }
 
-    private fun setupRecyclerView(recyclerView: RecyclerView) {
-        recyclerView.adapter = SimpleItemRecyclerViewAdapter(this, DummyContent.ITEMS, twoPane)
+    override fun onDestroy() {
+        super.onDestroy()
+        scanSubscription.dispose()
     }
 
     class SimpleItemRecyclerViewAdapter(private val parentActivity: ItemListActivity,
-                                        private val values: List<DummyContent.DummyItem>,
                                         private val twoPane: Boolean) :
             RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>() {
 
         private val onClickListener: View.OnClickListener
+        private var items: ArrayList<ScanResult> = arrayListOf()
 
         init {
             onClickListener = View.OnClickListener { v ->
@@ -80,6 +107,17 @@ class ItemListActivity : AppCompatActivity() {
             }
         }
 
+        fun addResult(r: ScanResult) {
+            val existing = this.items.indexOfFirst { it.bleDevice.macAddress == r.bleDevice.macAddress }
+            if (existing < 0) {
+                this.items.add(r)
+            } else {
+                this.items[existing] = r
+            }
+            this.items.sortByDescending { it.bleDevice.name }
+            notifyDataSetChanged()
+        }
+
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_list_content, parent, false)
@@ -87,9 +125,9 @@ class ItemListActivity : AppCompatActivity() {
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = values[position]
-            holder.idView.text = item.id
-            holder.contentView.text = item.content
+            val item = items[position]
+            holder.idView.text = "${item.bleDevice.name} ${item.rssi}"
+            holder.contentView.text = item.bleDevice.macAddress
 
             with(holder.itemView) {
                 tag = item
@@ -97,7 +135,7 @@ class ItemListActivity : AppCompatActivity() {
             }
         }
 
-        override fun getItemCount() = values.size
+        override fun getItemCount() = items.size
 
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val idView: TextView = view.id_text
