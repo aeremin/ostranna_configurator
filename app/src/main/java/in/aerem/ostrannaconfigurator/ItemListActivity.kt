@@ -1,18 +1,17 @@
 package `in`.aerem.ostrannaconfigurator
 
+import `in`.aerem.ostrannaconfigurator.dummy.DummyContent
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-
-import `in`.aerem.ostrannaconfigurator.dummy.DummyContent
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_item_list.*
-import kotlinx.android.synthetic.main.item_list_content.view.*
 import kotlinx.android.synthetic.main.item_list.*
+import kotlinx.android.synthetic.main.item_list_content.view.*
 
 /**
  * An activity representing a list of Pings. This activity
