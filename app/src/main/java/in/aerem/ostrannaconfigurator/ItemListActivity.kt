@@ -126,8 +126,9 @@ class ItemListActivity : AppCompatActivity() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = items[position]
-            holder.idView.text = "${item.bleDevice.name} ${item.rssi}"
-            holder.contentView.text = item.bleDevice.macAddress
+            holder.mainTextView.text = item.bleDevice.name
+            holder.subTextView.text = item.bleDevice.macAddress
+            holder.rssiView.text = item.rssi.toString()
 
             with(holder.itemView) {
                 tag = item
@@ -138,8 +139,9 @@ class ItemListActivity : AppCompatActivity() {
         override fun getItemCount() = items.size
 
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val idView: TextView = view.id_text
-            val contentView: TextView = view.content
+            val mainTextView: TextView = view.mainText
+            val subTextView: TextView = view.subText
+            val rssiView: TextView = view.rssi
         }
     }
 }
