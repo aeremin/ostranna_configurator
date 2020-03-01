@@ -2,6 +2,7 @@ package `in`.aerem.ostrannaconfigurator
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.ParcelUuid
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -69,6 +70,7 @@ class ItemListActivity : AppCompatActivity() {
             .build()
 
         var scanFilter = ScanFilter.Builder()
+            .setServiceUuid( ParcelUuid(UUID.fromString("8ec87060-8865-4eca-82e0-2ea8e45e8221")))
             .build()
         scanSubscription = (application as OstrannaConfiguratorApplication).rxBleClient
             .scanBleDevices(scanSettings, scanFilter).subscribe(
