@@ -9,6 +9,9 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.microsoft.appcenter.AppCenter
+import com.microsoft.appcenter.analytics.Analytics
+import com.microsoft.appcenter.crashes.Crashes
 import com.polidea.rxandroidble2.scan.ScanFilter
 import com.polidea.rxandroidble2.scan.ScanResult
 import com.polidea.rxandroidble2.scan.ScanSettings
@@ -51,6 +54,11 @@ class ItemListActivity : AppCompatActivity() {
             // activity should be in two-pane mode.
             twoPane = true
         }
+
+        AppCenter.start(
+            application, "1b4861b1-8f51-47b5-9402-d41d5f5e16ae",
+            Analytics::class.java, Crashes::class.java
+        )
 
         val adapter = SimpleItemRecyclerViewAdapter(this, twoPane)
         item_list.adapter = adapter
