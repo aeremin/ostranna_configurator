@@ -63,7 +63,7 @@ class ItemDetailFragment : Fragment() {
                 batteryLevel.text = "Battery level is ${it[0]}"
             }, {
                 Log.e(TAG, "Error: ${it}")
-                Snackbar.make(view, "Error: ${it}", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Error: ${it}", Snackbar.LENGTH_LONG).show()
             })
             .let { connectionDisposable.add(it) }
 
@@ -72,7 +72,7 @@ class ItemDetailFragment : Fragment() {
             .flatMapSingle { it.getService(OSTRANNA_UUID) }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-                Snackbar.make(view, "Connected!", Snackbar.LENGTH_SHORT)
+                Snackbar.make(view, "Connected!", Snackbar.LENGTH_SHORT).show()
                 connectedBlock.visibility = View.VISIBLE
                 progressBar.visibility = View.GONE
                 for (ch in it.characteristics) {
@@ -86,7 +86,7 @@ class ItemDetailFragment : Fragment() {
                 }
             }, {
                 Log.e(TAG, "Error: ${it}")
-                Snackbar.make(view, "Error: ${it}", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Error: ${it}", Snackbar.LENGTH_LONG).show()
             }).let { connectionDisposable.add(it) }
 
         buttonBeepQuiet.setOnClickListener { beep(3)  }
