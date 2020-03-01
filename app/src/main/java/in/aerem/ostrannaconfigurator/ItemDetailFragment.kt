@@ -80,6 +80,7 @@ class ItemDetailFragment : Fragment() {
         buttonBeepQuiet.setOnClickListener { beep(3)  }
         buttonBeepNormal.setOnClickListener { beep(100)  }
         buttonBeepLoud.setOnClickListener { beep(255)  }
+        buttonBlink.setOnClickListener { blink() }
 
         buttonColor.setOnClickListener {
             ColorPickerDialogBuilder
@@ -108,6 +109,12 @@ class ItemDetailFragment : Fragment() {
     private fun beep(volume: Int) {
         connectionObservable
             .flatMapSingle { it.writeCharacteristic(BEEP_UUID, byteArrayOf(volume.toByte())) }
+            .subscribe().let { connectionDisposable.add(it) }
+    }
+
+    private fun blink() {
+        connectionObservable
+            .flatMapSingle { it.writeCharacteristic(BLINK_UUID, byteArrayOf(0)) }
             .subscribe().let { connectionDisposable.add(it) }
     }
 
