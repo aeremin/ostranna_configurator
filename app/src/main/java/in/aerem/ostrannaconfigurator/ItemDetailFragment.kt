@@ -1,11 +1,17 @@
 package `in`.aerem.ostrannaconfigurator
 
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.graphics.blue
+import androidx.core.graphics.green
+import androidx.core.graphics.red
 import androidx.fragment.app.Fragment
+import com.flask.colorpicker.ColorPickerView
+import com.flask.colorpicker.builder.ColorPickerDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rx.ReplayingShare
 import com.polidea.rxandroidble2.RxBleConnection
@@ -16,6 +22,7 @@ import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_item_detail.*
 import kotlinx.android.synthetic.main.item_detail.*
 import java.util.*
+
 
 /**
  * A fragment representing a single Item detail screen.
@@ -50,7 +57,7 @@ class ItemDetailFragment : Fragment() {
         connectionObservable
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe{
-                beepBlock.visibility = View.VISIBLE
+                connectedBlock.visibility = View.VISIBLE
                 progressBar.visibility = View.GONE
                 Snackbar.make(view, "Connected!", Snackbar.LENGTH_SHORT)
             }
@@ -73,6 +80,24 @@ class ItemDetailFragment : Fragment() {
         buttonBeepQuiet.setOnClickListener { beep(3)  }
         buttonBeepNormal.setOnClickListener { beep(100)  }
         buttonBeepLoud.setOnClickListener { beep(255)  }
+
+        buttonColor.setOnClickListener {
+            ColorPickerDialogBuilder
+                .with(context)
+                .setTitle("Choose color")
+                .initialColor(Color.parseColor("#00ff00"))
+                .lightnessSliderOnly()
+                .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
+                .density(12)
+                .setPositiveButton(
+                    "OK"
+                ) { _, selectedColor, _ -> setColor(0xFFFFFF and selectedColor) }
+                .setNegativeButton(
+                    "Cancel"
+                ) { _, _ -> }
+                .build()
+                .show()
+        }
     }
 
     override fun onDestroy() {
@@ -85,9 +110,17 @@ class ItemDetailFragment : Fragment() {
             .flatMapSingle { it.writeCharacteristic(BEEP_UUID, byteArrayOf(volume.toByte())) }
             .subscribe().let { connectionDisposable.add(it) }
     }
+
+    private fun setColor(color: Int) {
+        connectionObservable
+            .flatMapSingle { it.writeCharacteristic(COLOR_UUID, byteArrayOf(color.red.toByte(), color.green.toByte(), color.blue.toByte())) }
+            .subscribe().let { connectionDisposable.add(it) }
+    }
+
     companion object {
         const val ARG_ITEM_ID = "item_id"
         val BATTERY_LEVEL_UUID: UUID = UUID.fromString("00002a19-0000-1000-8000-00805f9b34fb")
+        val COLOR_UUID: UUID = UUID.fromString("8ec87065-8865-4eca-82e0-2ea8e45e8221")
         val BEEP_UUID: UUID = UUID.fromString("8ec87062-8865-4eca-82e0-2ea8e45e8221")
         val BLINK_UUID: UUID = UUID.fromString("8ec87063-8865-4eca-82e0-2ea8e45e8221")
     }

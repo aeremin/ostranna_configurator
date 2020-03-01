@@ -26,14 +26,15 @@
         tools:text="XXX" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/beepBlock"
+        android:id="@+id/connectedBlock"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/batteryLevel">
+        app:layout_constraintTop_toBottomOf="@+id/batteryLevel"
+        tools:visibility="visible">
 
         <Button
             android:id="@+id/buttonBeepQuiet"
@@ -70,6 +71,16 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/buttonBeepNormal"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/buttonColor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="32dp"
+            android:text="Color"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/buttonBeepQuiet" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
