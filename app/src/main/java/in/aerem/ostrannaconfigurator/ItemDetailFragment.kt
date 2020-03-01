@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rx.ReplayingShare
 import com.polidea.rxandroidble2.RxBleConnection
 import com.polidea.rxandroidble2.RxBleDevice
@@ -46,7 +47,14 @@ class ItemDetailFragment : Fragment() {
         }
 
         connectionObservable = device!!.establishConnection(false).compose(ReplayingShare.instance())
-        connectionObservable.subscribe().let { connectionDisposable.add(it) }
+        connectionObservable
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe{
+                beepBlock.visibility = View.VISIBLE
+                progressBar.visibility = View.GONE
+                Snackbar.make(view, "Connected!", Snackbar.LENGTH_SHORT)
+            }
+            .let { connectionDisposable.add(it) }
 
         connectionObservable
             .flatMap {
@@ -54,20 +62,17 @@ class ItemDetailFragment : Fragment() {
             }
             .flatMap { it }
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                {
-                    buttonBeep.isEnabled = true
-                    batteryLevel.text = "Battery level is ${it[0]}"
-                },
-                { Log.e(TAG, "Error: ${it}") }
-            )
+            .subscribe({
+                batteryLevel.text = "Battery level is ${it[0]}"
+            }, {
+                Log.e(TAG, "Error: ${it}")
+                Snackbar.make(view, "Error: ${it}", Snackbar.LENGTH_LONG)
+            })
             .let { connectionDisposable.add(it) }
 
-        buttonBeep.setOnClickListener {
-            connectionObservable
-                .flatMapSingle { it.writeCharacteristic(BEEP_UUID, ByteArray(1)) }
-                .subscribe().let { connectionDisposable.add(it) }
-        }
+        buttonBeepQuiet.setOnClickListener { beep(3)  }
+        buttonBeepNormal.setOnClickListener { beep(100)  }
+        buttonBeepLoud.setOnClickListener { beep(255)  }
     }
 
     override fun onDestroy() {
@@ -75,7 +80,11 @@ class ItemDetailFragment : Fragment() {
         connectionDisposable.clear()
     }
 
-
+    private fun beep(volume: Int) {
+        connectionObservable
+            .flatMapSingle { it.writeCharacteristic(BEEP_UUID, byteArrayOf(volume.toByte())) }
+            .subscribe().let { connectionDisposable.add(it) }
+    }
     companion object {
         const val ARG_ITEM_ID = "item_id"
         val BATTERY_LEVEL_UUID: UUID = UUID.fromString("00002a19-0000-1000-8000-00805f9b34fb")
