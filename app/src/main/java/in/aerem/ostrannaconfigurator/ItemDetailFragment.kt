@@ -48,7 +48,9 @@ class ItemDetailFragment : Fragment() {
         device = bleClient.getBleDevice(mac)
         activity?.toolbar_layout?.title = device?.name
         if (device == null) {
-            Log.e(TAG, "Device with the mac address $mac not found")
+            Snackbar.make(view,
+                "Device with the mac address $mac not found",
+                Snackbar.LENGTH_LONG).show()
             return
         }
 
@@ -63,7 +65,9 @@ class ItemDetailFragment : Fragment() {
                 batteryLevel.text = "Battery level is ${it[0]}"
             }, {
                 Log.e(TAG, "Error: ${it}")
-                Snackbar.make(view, "Error: ${it}", Snackbar.LENGTH_LONG).show()
+                Snackbar.make(view,
+                    "Failure when subscribing to battery level updates: ${it}",
+                    Snackbar.LENGTH_LONG).show()
             })
             .let { connectionDisposable.add(it) }
 
@@ -86,7 +90,10 @@ class ItemDetailFragment : Fragment() {
                 }
             }, {
                 Log.e(TAG, "Error: ${it}")
-                Snackbar.make(view, "Error: ${it}", Snackbar.LENGTH_LONG).show()
+                Snackbar.make(view,
+                    "Failure when discovering BLE services: ${it}",
+                    Snackbar.LENGTH_LONG).show()
+                fragmentManager?.popBackStack()
             }).let { connectionDisposable.add(it) }
 
         buttonBeepQuiet.setOnClickListener { beep(3)  }
@@ -121,19 +128,34 @@ class ItemDetailFragment : Fragment() {
     private fun beep(volume: Int) {
         connectionObservable
             .flatMapSingle { it.writeCharacteristic(BEEP_UUID, byteArrayOf(volume.toByte())) }
-            .subscribe().let { connectionDisposable.add(it) }
+            .subscribe({
+                Snackbar.make(view!!, "Success!", Snackbar.LENGTH_SHORT).show()
+            }, {
+                Snackbar.make(view!!, "Fail!", Snackbar.LENGTH_LONG).show()
+            })
+            .let { connectionDisposable.add(it) }
     }
 
     private fun blink() {
         connectionObservable
             .flatMapSingle { it.writeCharacteristic(BLINK_UUID, byteArrayOf(0)) }
-            .subscribe().let { connectionDisposable.add(it) }
+            .subscribe({
+                Snackbar.make(view!!, "Success!", Snackbar.LENGTH_SHORT).show()
+            }, {
+                Snackbar.make(view!!, "Fail!", Snackbar.LENGTH_LONG).show()
+            })
+            .let { connectionDisposable.add(it) }
     }
 
     private fun setColor(color: Int) {
         connectionObservable
             .flatMapSingle { it.writeCharacteristic(COLOR_UUID, byteArrayOf(color.red.toByte(), color.green.toByte(), color.blue.toByte())) }
-            .subscribe().let { connectionDisposable.add(it) }
+            .subscribe({
+                Snackbar.make(view!!, "Success!", Snackbar.LENGTH_SHORT).show()
+            }, {
+                Snackbar.make(view!!, "Fail!", Snackbar.LENGTH_LONG).show()
+            })
+            .let { connectionDisposable.add(it) }
     }
 
     companion object {
