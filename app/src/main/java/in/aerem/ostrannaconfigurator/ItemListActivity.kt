@@ -1,6 +1,8 @@
 package `in`.aerem.ostrannaconfigurator
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.ParcelUuid
 import android.util.Log
@@ -9,6 +11,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.analytics.Analytics
@@ -32,7 +36,11 @@ import java.util.*
  * item details side-by-side using two vertical panes.
  */
 class ItemListActivity : AppCompatActivity() {
-    private val TAG = "ItemListActivity"
+    companion object {
+        const val PERMISSIONS_REQUEST_LOCATION = 1
+        const val TAG = "ItemListActivity"
+    }
+
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
@@ -61,9 +69,36 @@ class ItemListActivity : AppCompatActivity() {
             Analytics::class.java, Crashes::class.java
         )
 
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
+                PERMISSIONS_REQUEST_LOCATION)
+        } else {
+            startScan()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        scanSubscription.dispose()
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<String>, grantResults: IntArray) {
+        when (requestCode) {
+            PERMISSIONS_REQUEST_LOCATION -> {
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    startScan()
+                }
+            }
+        }
+    }
+
+    private fun startScan() {
         val adapter = SimpleItemRecyclerViewAdapter(this, twoPane)
         item_list.adapter = adapter
-
         var scanSettings = ScanSettings.Builder()
             .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
             .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
@@ -74,16 +109,11 @@ class ItemListActivity : AppCompatActivity() {
             .build()
         scanSubscription = (application as OstrannaConfiguratorApplication).rxBleClient
             .scanBleDevices(scanSettings, scanFilter).subscribe(
-            {
-                if (it.bleDevice.name != null) adapter.addResult(it)
-            },
-            { Log.e(TAG, "Error: ${it.message}") }
-        )
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        scanSubscription.dispose()
+                {
+                    if (it.bleDevice.name != null) adapter.addResult(it)
+                },
+                { Log.e(TAG, "Error: ${it.message}") }
+            )
     }
 
     class SimpleItemRecyclerViewAdapter(private val parentActivity: ItemListActivity,
@@ -124,7 +154,6 @@ class ItemListActivity : AppCompatActivity() {
                 this.items[existing] = r
                 notifyItemChanged(existing)
             }
-            // this.items.sortByDescending { it.bleDevice.name }
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
