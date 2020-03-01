@@ -21,7 +21,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_item_detail.*
 import kotlinx.android.synthetic.main.item_detail.*
-import java.util.*
 
 
 /**
@@ -55,15 +54,6 @@ class ItemDetailFragment : Fragment() {
 
         connectionObservable = device!!.establishConnection(false).compose(ReplayingShare.instance())
         connectionObservable
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe{
-                connectedBlock.visibility = View.VISIBLE
-                progressBar.visibility = View.GONE
-                Snackbar.make(view, "Connected!", Snackbar.LENGTH_SHORT)
-            }
-            .let { connectionDisposable.add(it) }
-
-        connectionObservable
             .flatMap {
                 it.setupNotification(BATTERY_LEVEL_UUID)
             }
@@ -76,6 +66,28 @@ class ItemDetailFragment : Fragment() {
                 Snackbar.make(view, "Error: ${it}", Snackbar.LENGTH_LONG)
             })
             .let { connectionDisposable.add(it) }
+
+        connectionObservable
+            .flatMapSingle { it.discoverServices() }
+            .flatMapSingle { it.getService(OSTRANNA_UUID) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                Snackbar.make(view, "Connected!", Snackbar.LENGTH_SHORT)
+                connectedBlock.visibility = View.VISIBLE
+                progressBar.visibility = View.GONE
+                for (ch in it.characteristics) {
+                    if (ch.uuid == COLOR_UUID) buttonColor.isEnabled = true
+                    if (ch.uuid == BEEP_UUID) {
+                        buttonBeepQuiet.isEnabled = true
+                        buttonBeepNormal.isEnabled = true
+                        buttonBeepLoud.isEnabled = true
+                    }
+                    if (ch.uuid == BLINK_UUID) buttonBlink.isEnabled = true
+                }
+            }, {
+                Log.e(TAG, "Error: ${it}")
+                Snackbar.make(view, "Error: ${it}", Snackbar.LENGTH_LONG)
+            }).let { connectionDisposable.add(it) }
 
         buttonBeepQuiet.setOnClickListener { beep(3)  }
         buttonBeepNormal.setOnClickListener { beep(100)  }
@@ -126,9 +138,5 @@ class ItemDetailFragment : Fragment() {
 
     companion object {
         const val ARG_ITEM_ID = "item_id"
-        val BATTERY_LEVEL_UUID: UUID = UUID.fromString("00002a19-0000-1000-8000-00805f9b34fb")
-        val COLOR_UUID: UUID = UUID.fromString("8ec87065-8865-4eca-82e0-2ea8e45e8221")
-        val BEEP_UUID: UUID = UUID.fromString("8ec87062-8865-4eca-82e0-2ea8e45e8221")
-        val BLINK_UUID: UUID = UUID.fromString("8ec87063-8865-4eca-82e0-2ea8e45e8221")
     }
 }

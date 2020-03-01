@@ -70,7 +70,7 @@ class ItemListActivity : AppCompatActivity() {
             .build()
 
         var scanFilter = ScanFilter.Builder()
-            .setServiceUuid( ParcelUuid(UUID.fromString("8ec87060-8865-4eca-82e0-2ea8e45e8221")))
+            .setServiceUuid( ParcelUuid(OSTRANNA_UUID))
             .build()
         scanSubscription = (application as OstrannaConfiguratorApplication).rxBleClient
             .scanBleDevices(scanSettings, scanFilter).subscribe(
