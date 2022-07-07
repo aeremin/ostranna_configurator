@@ -1,6 +1,6 @@
 package `in`.aerem.ostrannaconfigurator
 
-import java.util.*
+import java.util.UUID
 
 val BATTERY_LEVEL_UUID: UUID = UUID.fromString("00002a19-0000-1000-8000-00805f9b34fb")
 val OSTRANNA_UUID: UUID = UUID.fromString("8ec87060-8865-4eca-82e0-2ea8e45e8221")

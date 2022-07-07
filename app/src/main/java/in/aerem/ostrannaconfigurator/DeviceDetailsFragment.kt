@@ -23,15 +23,9 @@ import kotlinx.android.synthetic.main.activity_item_detail.*
 import kotlinx.android.synthetic.main.item_detail.*
 
 
-/**
- * A fragment representing a single Item detail screen.
- * This fragment is either contained in a [ItemListActivity]
- * in two-pane mode (on tablets) or a [ItemDetailActivity]
- * on handsets.
- */
-class ItemDetailFragment : Fragment() {
+class DeviceDetailsFragment : Fragment() {
     private val bleClient by lazy { (activity!!.application as OstrannaConfiguratorApplication).rxBleClient }
-    private val TAG = "ItemDetailFragment"
+    private val TAG = "DeviceDetailsFragment"
     private var device: RxBleDevice? = null
     private val connectionDisposable = CompositeDisposable()
     private lateinit var connectionObservable: Observable<RxBleConnection>
@@ -44,7 +38,7 @@ class ItemDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val mac = arguments!!.getString(ARG_ITEM_ID)!!
+        val mac = arguments!!.getString(ARG_MAC_ADDRESS)!!
         Log.i(TAG, "Connecting to the device with mac address: ${mac}")
         device = bleClient.getBleDevice(mac)
         activity?.toolbar_layout?.title = device?.name
@@ -160,6 +154,6 @@ class ItemDetailFragment : Fragment() {
     }
 
     companion object {
-        const val ARG_ITEM_ID = "item_id"
+        const val ARG_MAC_ADDRESS = "mac_address"
     }
 }

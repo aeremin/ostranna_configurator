@@ -27,18 +27,10 @@ import kotlinx.android.synthetic.main.item_list_content.view.*
 import java.util.*
 
 
-/**
- * An activity representing a list of Pings. This activity
- * has different presentations for handset and tablet-size devices. On
- * handsets, the activity presents a list of items, which when touched,
- * lead to a [ItemDetailActivity] representing
- * item details. On tablets, the activity presents the list of items and
- * item details side-by-side using two vertical panes.
- */
-class ItemListActivity : AppCompatActivity() {
+class DevicesListActivity : AppCompatActivity() {
     companion object {
         const val PERMISSIONS_REQUEST_LOCATION = 1
-        const val TAG = "ItemListActivity"
+        const val TAG = "DevicesListActivity"
     }
 
     private lateinit var scanSubscription: Disposable
@@ -55,7 +47,6 @@ class ItemListActivity : AppCompatActivity() {
             Analytics::class.java, Crashes::class.java
         )
 
-        // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
@@ -85,12 +76,12 @@ class ItemListActivity : AppCompatActivity() {
     private fun startScan() {
         val adapter = SimpleItemRecyclerViewAdapter(this)
         item_list.adapter = adapter
-        var scanSettings = ScanSettings.Builder()
+        val scanSettings = ScanSettings.Builder()
             .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
             .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
             .build()
 
-        var scanFilter = ScanFilter.Builder()
+        val scanFilter = ScanFilter.Builder()
             .setServiceUuid( ParcelUuid(OSTRANNA_UUID))
             .build()
         scanSubscription = (application as OstrannaConfiguratorApplication).rxBleClient
@@ -102,7 +93,7 @@ class ItemListActivity : AppCompatActivity() {
             )
     }
 
-    class SimpleItemRecyclerViewAdapter(private val parentActivity: ItemListActivity) :
+    class SimpleItemRecyclerViewAdapter(private val parentActivity: DevicesListActivity) :
             RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>() {
 
         private val onClickListener: View.OnClickListener
@@ -131,8 +122,8 @@ class ItemListActivity : AppCompatActivity() {
         }
 
         fun connectTo(address: String) {
-            val intent = Intent(this.parentActivity, ItemDetailActivity::class.java).apply {
-                putExtra(ItemDetailFragment.ARG_ITEM_ID, address)
+            val intent = Intent(this.parentActivity, DeviceDetailsActivity::class.java).apply {
+                putExtra(DeviceDetailsFragment.ARG_MAC_ADDRESS, address)
             }
             this.parentActivity.startActivity(intent)
         }
