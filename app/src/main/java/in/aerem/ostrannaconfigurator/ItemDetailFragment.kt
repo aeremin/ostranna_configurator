@@ -45,6 +45,7 @@ class ItemDetailFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val mac = arguments!!.getString(ARG_ITEM_ID)!!
+        Log.i(TAG, "Connecting to the device with mac address: ${mac}")
         device = bleClient.getBleDevice(mac)
         activity?.toolbar_layout?.title = device?.name
         if (device == null) {
