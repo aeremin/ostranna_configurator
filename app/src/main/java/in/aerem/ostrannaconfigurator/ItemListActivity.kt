@@ -41,12 +41,6 @@ class ItemListActivity : AppCompatActivity() {
         const val TAG = "ItemListActivity"
     }
 
-    /**
-     * Whether or not the activity is in two-pane mode, i.e. running on a tablet
-     * device.
-     */
-    private var twoPane: Boolean = false
-
     private lateinit var scanSubscription: Disposable
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,14 +49,6 @@ class ItemListActivity : AppCompatActivity() {
 
         setSupportActionBar(toolbar)
         toolbar.title = title
-
-        if (item_detail_container != null) {
-            // The detail container view will be present only in the
-            // large-screen layouts (res/values-w900dp).
-            // If this view is present, then the
-            // activity should be in two-pane mode.
-            twoPane = true
-        }
 
         AppCenter.start(
             application, "1b4861b1-8f51-47b5-9402-d41d5f5e16ae",
@@ -97,7 +83,7 @@ class ItemListActivity : AppCompatActivity() {
     }
 
     private fun startScan() {
-        val adapter = SimpleItemRecyclerViewAdapter(this, twoPane)
+        val adapter = SimpleItemRecyclerViewAdapter(this)
         item_list.adapter = adapter
         var scanSettings = ScanSettings.Builder()
             .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
@@ -116,8 +102,7 @@ class ItemListActivity : AppCompatActivity() {
             )
     }
 
-    class SimpleItemRecyclerViewAdapter(private val parentActivity: ItemListActivity,
-                                        private val twoPane: Boolean) :
+    class SimpleItemRecyclerViewAdapter(private val parentActivity: ItemListActivity) :
             RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>() {
 
         private val onClickListener: View.OnClickListener
@@ -146,22 +131,10 @@ class ItemListActivity : AppCompatActivity() {
         }
 
         fun connectTo(address: String) {
-            if (twoPane) {
-                val fragment = ItemDetailFragment().apply {
-                    arguments = Bundle().apply {
-                        putString(ItemDetailFragment.ARG_ITEM_ID, address)
-                    }
-                }
-                parentActivity.supportFragmentManager
-                    .beginTransaction()
-                    .replace(R.id.item_detail_container, fragment)
-                    .commit()
-            } else {
-                val intent = Intent(this.parentActivity, ItemDetailActivity::class.java).apply {
-                    putExtra(ItemDetailFragment.ARG_ITEM_ID, address)
-                }
-                this.parentActivity.startActivity(intent)
+            val intent = Intent(this.parentActivity, ItemDetailActivity::class.java).apply {
+                putExtra(ItemDetailFragment.ARG_ITEM_ID, address)
             }
+            this.parentActivity.startActivity(intent)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
