@@ -126,22 +126,7 @@ class ItemListActivity : AppCompatActivity() {
         init {
             onClickListener = View.OnClickListener { v ->
                 val item = v.tag as ScanResult
-                if (twoPane) {
-                    val fragment = ItemDetailFragment().apply {
-                        arguments = Bundle().apply {
-                            putString(ItemDetailFragment.ARG_ITEM_ID, item.bleDevice.macAddress)
-                        }
-                    }
-                    parentActivity.supportFragmentManager
-                            .beginTransaction()
-                            .replace(R.id.item_detail_container, fragment)
-                            .commit()
-                } else {
-                    val intent = Intent(v.context, ItemDetailActivity::class.java).apply {
-                        putExtra(ItemDetailFragment.ARG_ITEM_ID, item.bleDevice.macAddress)
-                    }
-                    v.context.startActivity(intent)
-                }
+                connectTo(item.bleDevice.macAddress)
             }
         }
 
@@ -153,6 +138,29 @@ class ItemListActivity : AppCompatActivity() {
             } else {
                 this.items[existing] = r
                 notifyItemChanged(existing)
+            }
+
+            if (r.rssi > -42) {
+                connectTo(r.bleDevice.macAddress)
+            }
+        }
+
+        fun connectTo(address: String) {
+            if (twoPane) {
+                val fragment = ItemDetailFragment().apply {
+                    arguments = Bundle().apply {
+                        putString(ItemDetailFragment.ARG_ITEM_ID, address)
+                    }
+                }
+                parentActivity.supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.item_detail_container, fragment)
+                    .commit()
+            } else {
+                val intent = Intent(this.parentActivity, ItemDetailActivity::class.java).apply {
+                    putExtra(ItemDetailFragment.ARG_ITEM_ID, address)
+                }
+                this.parentActivity.startActivity(intent)
             }
         }
 
