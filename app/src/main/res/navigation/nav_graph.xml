@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/deviceListFragment">
+
+    <fragment
+        android:id="@+id/deviceListFragment"
+        android:name="in.aerem.ostrannaconfigurator.DevicesListFragment"
+        android:label="DevicesListFragment" >
+        <action
+            android:id="@+id/action_deviceListFragment_to_deviceDetailsFragment"
+            app:destination="@id/deviceDetailsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/deviceDetailsFragment"
+        android:name="in.aerem.ostrannaconfigurator.DeviceDetailsFragment"
+        android:label="DeviceDetailsFragment" >
+        <argument
+            android:name="mac_address"
+            app:argType="string" />
+    </fragment>
+</navigation>

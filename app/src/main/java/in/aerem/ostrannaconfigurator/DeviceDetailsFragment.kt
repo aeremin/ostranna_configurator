@@ -10,6 +10,7 @@ import androidx.core.graphics.blue
 import androidx.core.graphics.green
 import androidx.core.graphics.red
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.navArgs
 import com.flask.colorpicker.ColorPickerView
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -24,7 +25,8 @@ import kotlinx.android.synthetic.main.item_detail.*
 
 
 class DeviceDetailsFragment : Fragment() {
-    private val bleClient by lazy { (activity!!.application as OstrannaConfiguratorApplication).rxBleClient }
+    private val args: DeviceDetailsFragmentArgs by navArgs()
+    private val bleClient by lazy { (requireActivity().application as OstrannaConfiguratorApplication).rxBleClient }
     private val TAG = "DeviceDetailsFragment"
     private var device: RxBleDevice? = null
     private val connectionDisposable = CompositeDisposable()
@@ -38,7 +40,7 @@ class DeviceDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val mac = arguments!!.getString(ARG_MAC_ADDRESS)!!
+        val mac = args.macAddress
         Log.i(TAG, "Connecting to the device with mac address: ${mac}")
         device = bleClient.getBleDevice(mac)
         activity?.toolbar_layout?.title = device?.name
@@ -124,9 +126,9 @@ class DeviceDetailsFragment : Fragment() {
         connectionObservable
             .flatMapSingle { it.writeCharacteristic(BEEP_UUID, byteArrayOf(volume.toByte())) }
             .subscribe({
-                Snackbar.make(view!!, "Success!", Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(requireView(), "Success!", Snackbar.LENGTH_SHORT).show()
             }, {
-                Snackbar.make(view!!, "Fail!", Snackbar.LENGTH_LONG).show()
+                Snackbar.make(requireView(), "Fail!", Snackbar.LENGTH_LONG).show()
             })
             .let { connectionDisposable.add(it) }
     }
@@ -135,9 +137,9 @@ class DeviceDetailsFragment : Fragment() {
         connectionObservable
             .flatMapSingle { it.writeCharacteristic(BLINK_UUID, byteArrayOf(0)) }
             .subscribe({
-                Snackbar.make(view!!, "Success!", Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(requireView(), "Success!", Snackbar.LENGTH_SHORT).show()
             }, {
-                Snackbar.make(view!!, "Fail!", Snackbar.LENGTH_LONG).show()
+                Snackbar.make(requireView(), "Fail!", Snackbar.LENGTH_LONG).show()
             })
             .let { connectionDisposable.add(it) }
     }
@@ -146,14 +148,10 @@ class DeviceDetailsFragment : Fragment() {
         connectionObservable
             .flatMapSingle { it.writeCharacteristic(COLOR_UUID, byteArrayOf(color.red.toByte(), color.green.toByte(), color.blue.toByte())) }
             .subscribe({
-                Snackbar.make(view!!, "Success!", Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(requireView(), "Success!", Snackbar.LENGTH_SHORT).show()
             }, {
-                Snackbar.make(view!!, "Fail!", Snackbar.LENGTH_LONG).show()
+                Snackbar.make(requireView(), "Fail!", Snackbar.LENGTH_LONG).show()
             })
             .let { connectionDisposable.add(it) }
-    }
-
-    companion object {
-        const val ARG_MAC_ADDRESS = "mac_address"
     }
 }

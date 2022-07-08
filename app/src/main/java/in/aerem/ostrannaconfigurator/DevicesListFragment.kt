@@ -1,7 +1,6 @@
 package `in`.aerem.ostrannaconfigurator
 
 import android.Manifest
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.ParcelUuid
@@ -10,51 +9,44 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
-import com.microsoft.appcenter.AppCenter
-import com.microsoft.appcenter.analytics.Analytics
-import com.microsoft.appcenter.crashes.Crashes
 import com.polidea.rxandroidble2.scan.ScanFilter
 import com.polidea.rxandroidble2.scan.ScanResult
 import com.polidea.rxandroidble2.scan.ScanSettings
 import io.reactivex.disposables.Disposable
-import kotlinx.android.synthetic.main.activity_item_list.*
 import kotlinx.android.synthetic.main.item_list.*
 import kotlinx.android.synthetic.main.item_list_content.view.*
 import java.util.*
 
 
-class DevicesListActivity : AppCompatActivity() {
+class DevicesListFragment : Fragment() {
     companion object {
         const val PERMISSIONS_REQUEST_LOCATION = 1
-        const val TAG = "DevicesListActivity"
+        const val TAG = "DevicesListFragment"
     }
 
     private lateinit var scanSubscription: Disposable
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_item_list)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.activity_item_list, container, false)
+    }
 
-        setSupportActionBar(toolbar)
-        toolbar.title = title
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        AppCenter.start(
-            application, "1b4861b1-8f51-47b5-9402-d41d5f5e16ae",
-            Analytics::class.java, Crashes::class.java
-        )
-
-        if (ContextCompat.checkSelfPermission(this,
+        /*if (ContextCompat.checkSelfPermission(requireActivity(),
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
+            ActivityCompat.requestPermissions(requireActivity(),
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
                 PERMISSIONS_REQUEST_LOCATION)
-        } else {
+        } else {*/
             startScan()
-        }
+        //}
     }
 
     override fun onDestroy() {
@@ -74,6 +66,7 @@ class DevicesListActivity : AppCompatActivity() {
     }
 
     private fun startScan() {
+        Log.i(TAG, "Starting bluetooth scan")
         val adapter = SimpleItemRecyclerViewAdapter(this)
         item_list.adapter = adapter
         val scanSettings = ScanSettings.Builder()
@@ -84,7 +77,7 @@ class DevicesListActivity : AppCompatActivity() {
         val scanFilter = ScanFilter.Builder()
             .setServiceUuid( ParcelUuid(OSTRANNA_UUID))
             .build()
-        scanSubscription = (application as OstrannaConfiguratorApplication).rxBleClient
+        scanSubscription = (requireActivity().application as OstrannaConfiguratorApplication).rxBleClient
             .scanBleDevices(scanSettings, scanFilter).subscribe(
                 {
                     if (it.bleDevice.name != null) adapter.addResult(it)
@@ -93,7 +86,7 @@ class DevicesListActivity : AppCompatActivity() {
             )
     }
 
-    class SimpleItemRecyclerViewAdapter(private val parentActivity: DevicesListActivity) :
+    class SimpleItemRecyclerViewAdapter(private val parentFragment: DevicesListFragment) :
             RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>() {
 
         private val onClickListener: View.OnClickListener
@@ -122,10 +115,8 @@ class DevicesListActivity : AppCompatActivity() {
         }
 
         fun connectTo(address: String) {
-            val intent = Intent(this.parentActivity, DeviceDetailsActivity::class.java).apply {
-                putExtra(DeviceDetailsFragment.ARG_MAC_ADDRESS, address)
-            }
-            this.parentActivity.startActivity(intent)
+            val action = DevicesListFragmentDirections.actionDeviceListFragmentToDeviceDetailsFragment(address)
+            parentFragment.findNavController().navigate(action)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

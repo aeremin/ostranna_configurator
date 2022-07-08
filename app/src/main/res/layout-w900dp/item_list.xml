@@ -10,7 +10,7 @@
     android:divider="?android:attr/dividerHorizontal"
     android:orientation="horizontal"
     android:showDividers="middle"
-    tools:context=".DevicesListActivity">
+    tools:context=".DevicesListFragment">
 
     <!--
     This layout is a two-pane layout for the Items master/detail flow.
@@ -31,7 +31,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         app:layoutManager="LinearLayoutManager"
-        tools:context="in.aerem.ostrannaconfigurator.DevicesListActivity"
+        tools:context="in.aerem.ostrannaconfigurator.DevicesListFragment"
         tools:listitem="@layout/item_list_content" />
 
 </LinearLayout>
