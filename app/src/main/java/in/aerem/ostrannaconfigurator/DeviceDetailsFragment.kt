@@ -44,6 +44,7 @@ class DeviceDetailsFragment : Fragment() {
             Snackbar.make(view,
                 "Device with the mac address $mac not found",
                 Snackbar.LENGTH_LONG).show()
+            parentFragmentManager.popBackStack()
             return
         }
 
