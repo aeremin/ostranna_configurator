@@ -16,7 +16,6 @@ import com.flask.colorpicker.builder.ColorPickerDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rx.ReplayingShare
 import com.polidea.rxandroidble2.RxBleConnection
-import com.polidea.rxandroidble2.RxBleDevice
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -26,8 +25,6 @@ import kotlinx.android.synthetic.main.item_detail.*
 class DeviceDetailsFragment : Fragment() {
     private val args: DeviceDetailsFragmentArgs by navArgs()
     private val bleClient by lazy { (requireActivity().application as OstrannaConfiguratorApplication).rxBleClient }
-    private val TAG = "DeviceDetailsFragment"
-    private var device: RxBleDevice? = null
     private val connectionDisposable = CompositeDisposable()
     private lateinit var connectionObservable: Observable<RxBleConnection>
 
@@ -40,8 +37,8 @@ class DeviceDetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val mac = args.macAddress
-        Log.i(TAG, "Connecting to the device with mac address: ${mac}")
-        device = bleClient.getBleDevice(mac)
+        Log.i(TAG, "Connecting to the device with mac address: $mac")
+        val device = bleClient.getBleDevice(mac)
         (activity as MainActivity).supportActionBar?.subtitle  = device?.name
         if (device == null) {
             Snackbar.make(view,
@@ -50,7 +47,7 @@ class DeviceDetailsFragment : Fragment() {
             return
         }
 
-        connectionObservable = device!!.establishConnection(false).compose(ReplayingShare.instance())
+        connectionObservable = device.establishConnection(false).compose(ReplayingShare.instance())
         connectionObservable
             .flatMap {
                 it.setupNotification(BATTERY_LEVEL_UUID)
@@ -60,9 +57,9 @@ class DeviceDetailsFragment : Fragment() {
             .subscribe({
                 batteryLevel.text = "Battery level is ${it[0]}"
             }, {
-                Log.e(TAG, "Error: ${it}")
+                Log.e(TAG, "Error: $it")
                 Snackbar.make(view,
-                    "Failure when subscribing to battery level updates: ${it}",
+                    "Failure when subscribing to battery level updates: $it",
                     Snackbar.LENGTH_LONG).show()
             })
             .let { connectionDisposable.add(it) }
@@ -85,11 +82,11 @@ class DeviceDetailsFragment : Fragment() {
                     if (ch.uuid == BLINK_UUID) buttonBlink.isEnabled = true
                 }
             }, {
-                Log.e(TAG, "Error: ${it}")
+                Log.e(TAG, "Error: $it")
                 Snackbar.make(view,
-                    "Failure when discovering BLE services: ${it}",
+                    "Failure when discovering BLE services: $it",
                     Snackbar.LENGTH_LONG).show()
-                fragmentManager?.popBackStack()
+                parentFragmentManager.popBackStack()
             }).let { connectionDisposable.add(it) }
 
         buttonBeepQuiet.setOnClickListener { beep(3)  }
@@ -153,5 +150,9 @@ class DeviceDetailsFragment : Fragment() {
                 Snackbar.make(requireView(), "Fail!", Snackbar.LENGTH_LONG).show()
             })
             .let { connectionDisposable.add(it) }
+    }
+
+    companion object {
+        private const val TAG = "DeviceDetailsFragment"
     }
 }

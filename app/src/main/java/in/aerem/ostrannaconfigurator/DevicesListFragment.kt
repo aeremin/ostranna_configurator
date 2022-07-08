@@ -1,6 +1,5 @@
 package `in`.aerem.ostrannaconfigurator
 
-import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.ParcelUuid
@@ -9,8 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
@@ -38,15 +35,7 @@ class DevicesListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        /*if (ContextCompat.checkSelfPermission(requireActivity(),
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(requireActivity(),
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
-                PERMISSIONS_REQUEST_LOCATION)
-        } else {*/
-            startScan()
-        //}
+        startScan()
     }
 
     override fun onDestroy() {
@@ -114,7 +103,7 @@ class DevicesListFragment : Fragment() {
             }
         }
 
-        fun connectTo(address: String) {
+        private fun connectTo(address: String) {
             val action = DevicesListFragmentDirections.actionDeviceListFragmentToDeviceDetailsFragment(address)
             parentFragment.findNavController().navigate(action)
         }
