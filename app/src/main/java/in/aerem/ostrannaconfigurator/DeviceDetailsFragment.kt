@@ -19,7 +19,7 @@ import com.polidea.rxandroidble2.RxBleConnection
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.android.synthetic.main.item_detail.*
+import kotlinx.android.synthetic.main.fragment_device_details.*
 
 
 class DeviceDetailsFragment : Fragment() {
@@ -30,7 +30,7 @@ class DeviceDetailsFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.item_detail, container, false)
+        return inflater.inflate(R.layout.fragment_device_details, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
