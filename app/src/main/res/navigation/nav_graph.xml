@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/deviceListFragment">
+    app:startDestination="@id/fragmentBluetoothNeeded">
 
     <fragment
         android:id="@+id/deviceListFragment"
@@ -27,5 +27,15 @@
             android:id="@+id/deepLink"
             android:autoVerify="true"
             app:uri="https://aeremin.github.io/deeplinks/mac/{mac_address}" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentBluetoothNeeded"
+        android:name="in.aerem.ostrannaconfigurator.BluetoothNeededFragment"
+        android:label="Bluetooth"
+        tools:layout="@layout/fragment_bluetooth_needed" >
+        <action
+            android:id="@+id/action_fragmentBluetoothNeeded_to_deviceListFragment"
+            app:destination="@id/deviceListFragment" />
     </fragment>
 </navigation>
