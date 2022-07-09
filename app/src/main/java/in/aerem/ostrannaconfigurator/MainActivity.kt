@@ -14,12 +14,17 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        setUpAppCenterIntegration()
+        setUpToolbarAndNavigationIntegration()
+    }
+
+    private fun setUpAppCenterIntegration() {
+        // See instruction at https://appcenter.ms/users/a.eremin.msu/apps/Ostranna-Configurator.
         AppCenter.start(
             application, "1b4861b1-8f51-47b5-9402-d41d5f5e16ae",
             Analytics::class.java, Crashes::class.java
         )
-
-        setUpToolbarAndNavigationIntegration()
     }
 
     private fun setUpToolbarAndNavigationIntegration() {
