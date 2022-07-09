@@ -11,10 +11,10 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
-import com.polidea.rxandroidble2.scan.ScanFilter
-import com.polidea.rxandroidble2.scan.ScanResult
-import com.polidea.rxandroidble2.scan.ScanSettings
-import io.reactivex.disposables.Disposable
+import com.polidea.rxandroidble3.scan.ScanFilter
+import com.polidea.rxandroidble3.scan.ScanResult
+import com.polidea.rxandroidble3.scan.ScanSettings
+import io.reactivex.rxjava3.disposables.Disposable
 import kotlinx.android.synthetic.main.device_list_item.view.*
 import kotlinx.android.synthetic.main.fragment_device_list.*
 import java.util.*

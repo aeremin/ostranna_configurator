@@ -14,11 +14,11 @@ import androidx.navigation.fragment.navArgs
 import com.flask.colorpicker.ColorPickerView
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder
 import com.google.android.material.snackbar.Snackbar
-import com.jakewharton.rx.ReplayingShare
-import com.polidea.rxandroidble2.RxBleConnection
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
+import com.jakewharton.rx3.ReplayingShare
+import com.polidea.rxandroidble3.RxBleConnection
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_device_details.*
 
