@@ -19,6 +19,7 @@ import com.polidea.rxandroidble2.RxBleConnection
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_device_details.*
 
 
@@ -39,7 +40,7 @@ class DeviceDetailsFragment : Fragment() {
         val mac = args.macAddress
         Log.i(TAG, "Connecting to the device with mac address: $mac")
         val device = bleClient.getBleDevice(mac)
-        (activity as MainActivity).supportActionBar?.subtitle  = device?.name
+        (activity as MainActivity).toolbar?.subtitle  = device?.name
         if (device == null) {
             Snackbar.make(view,
                 "Device with the mac address $mac not found",
@@ -117,7 +118,7 @@ class DeviceDetailsFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         connectionDisposable.clear()
-        (activity as MainActivity).supportActionBar?.subtitle = ""
+        (activity as MainActivity).toolbar?.subtitle = ""
     }
 
     private fun beep(volume: Int) {

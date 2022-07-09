@@ -2,6 +2,9 @@ package `in`.aerem.ostrannaconfigurator
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupWithNavController
 import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.analytics.Analytics
 import com.microsoft.appcenter.crashes.Crashes
@@ -16,7 +19,17 @@ class MainActivity : AppCompatActivity() {
             Analytics::class.java, Crashes::class.java
         )
 
-        setSupportActionBar(toolbar)
-        toolbar.title = title
+        setUpToolbarAndNavigationIntegration()
+    }
+
+    private fun setUpToolbarAndNavigationIntegration() {
+        // See https://issuetracker.google.com/issues/142847973 - this is not a recommended way
+        // to get navController, but nothing else works if it's added to the layout via
+        // androidx.fragment.app.FragmentContainerView.
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val navController = navHostFragment.navController
+        val appBarConfiguration = AppBarConfiguration(navController.graph)
+        toolbar.setupWithNavController(navController, appBarConfiguration)
     }
 }

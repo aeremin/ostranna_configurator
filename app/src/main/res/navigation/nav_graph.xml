@@ -8,7 +8,8 @@
     <fragment
         android:id="@+id/deviceListFragment"
         android:name="in.aerem.ostrannaconfigurator.DevicesListFragment"
-        android:label="DevicesListFragment" >
+        android:label="Список устройств"
+        tools:layout="@layout/fragment_device_list">
         <action
             android:id="@+id/action_deviceListFragment_to_deviceDetailsFragment"
             app:destination="@id/deviceDetailsFragment" />
@@ -17,7 +18,8 @@
     <fragment
         android:id="@+id/deviceDetailsFragment"
         android:name="in.aerem.ostrannaconfigurator.DeviceDetailsFragment"
-        android:label="DeviceDetailsFragment" >
+        android:label="Устройство {mac_address}"
+        tools:layout="@layout/fragment_device_details">
         <argument
             android:name="mac_address"
             app:argType="string" />
