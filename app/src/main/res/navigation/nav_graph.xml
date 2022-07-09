@@ -23,5 +23,9 @@
         <argument
             android:name="mac_address"
             app:argType="string" />
+        <deepLink
+            android:id="@+id/deepLink"
+            android:autoVerify="true"
+            app:uri="https://aeremin.github.io/deeplinks/mac/{mac_address}" />
     </fragment>
 </navigation>
