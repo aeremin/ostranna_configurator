@@ -36,7 +36,9 @@
         tools:layout="@layout/fragment_bluetooth_needed" >
         <action
             android:id="@+id/action_fragmentBluetoothNeeded_to_deviceListFragment"
-            app:destination="@id/deviceListFragment" />
+            app:destination="@id/deviceListFragment"
+            app:popUpTo="@+id/nav_graph"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
