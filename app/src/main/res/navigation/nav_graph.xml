@@ -38,4 +38,19 @@
             android:id="@+id/action_fragmentBluetoothNeeded_to_deviceListFragment"
             app:destination="@id/deviceListFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/enterPasswordFragment"
+        android:name="in.aerem.ostrannaconfigurator.EnterPasswordFragment"
+        android:label="Ввод пароля"
+        tools:layout="@layout/fragment_enter_password">
+        <argument
+            android:name="mac_address"
+            app:argType="string" />
+        <deepLink
+            android:id="@+id/deepLink2"
+            android:autoVerify="true"
+            app:uri="https://aeremin.github.io/deeplinks/code/{mac_address}" />
+    </fragment>
+
 </navigation>
