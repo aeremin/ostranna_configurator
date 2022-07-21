@@ -18,8 +18,15 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.fragment_enter_password.*
 
+enum class DeviceKind {
+    Unsupported,
+    OstrannaFirefly,
+    ElkBleDom,
+}
+
 class EnterPasswordFragment : Fragment() {
     private val args: EnterPasswordFragmentArgs by navArgs()
+    private var deviceKind = DeviceKind.Unsupported
     private val bleClient by lazy { (requireActivity().application as OstrannaConfiguratorApplication).rxBleClient }
     private val connectionDisposable = CompositeDisposable()
     private lateinit var connectionObservable: Observable<RxBleConnection>
@@ -44,7 +51,17 @@ class EnterPasswordFragment : Fragment() {
         }
 
         connectionObservable = device.establishConnection(false).compose(ReplayingShare.instance())
-        connectionDisposable.add(connectionObservable.subscribe())
+        connectionObservable
+            .flatMapSingle { it.discoverServices() }
+            .subscribe {
+                for (service in it.bluetoothGattServices) {
+                    if (service.uuid == OSTRANNA_UUID) {
+                        deviceKind = DeviceKind.OstrannaFirefly
+                    } else if (service.uuid == ELK_BLEDOM_SERVICE_UUID) {
+                        deviceKind = DeviceKind.ElkBleDom
+                    }
+                }
+            }.let { connectionDisposable.add(it) }
 
         try_code.setOnClickListener {
             if (code.text.toString() == "549") {
@@ -58,10 +75,26 @@ class EnterPasswordFragment : Fragment() {
     private fun setColor(color: Int) {
         connectionObservable
             .flatMapSingle {
-                it.writeCharacteristic(
-                    COLOR_UUID,
-                    byteArrayOf(color.red.toByte(), color.green.toByte(), color.blue.toByte())
-                )
+                when (deviceKind) {
+                    DeviceKind.OstrannaFirefly -> {
+                        it.writeCharacteristic(
+                            COLOR_UUID,
+                            byteArrayOf(color.red.toByte(), color.green.toByte(), color.blue.toByte())
+                        )
+                    }
+                    DeviceKind.ElkBleDom -> {
+                        // See https://github.com/FergusInLondon/ELK-BLEDOM/blob/master/PROTCOL.md#data-changing-colour
+                        it.writeCharacteristic(
+                            ELK_BLEDOM_CHARACTERISTIC_UUID,
+                            byteArrayOf(0x7E, 0x00, 0x05, 0x03, color.red.toByte(), color.green.toByte(), color.blue.toByte(), 0x00,
+                                0xEF.toByte()
+                            )
+                        )
+                    }
+                    DeviceKind.Unsupported -> {
+                        throw Exception("Unknown device kind")
+                    }
+                }
             }
             .subscribe({
                 Snackbar.make(requireView(), "Success!", Snackbar.LENGTH_SHORT).show()
